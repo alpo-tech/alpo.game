@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -10,7 +11,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//http.HandleFunc("/", handler)
-	//log.Fatal(http.ListenAndServe(":8080", nil))
-	fmt.Println("test build build test")
+	fmt.Println("run server - alpoGame welcome")
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(":8088", nil))
 }
