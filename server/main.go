@@ -9,7 +9,7 @@ import (
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("World, Hello!"))
+	w.Write([]byte("Vonucka, Hello!"))
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
