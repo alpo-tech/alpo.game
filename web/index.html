@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alpo Sea Battle</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>Alpo Sea Battle</h1>
+          <p id="status">Connecting...</p>
+        </div>
+        <div class="actions">
+          <button id="autoPlaceButton" type="button">Auto place</button>
+          <button id="readyButton" type="button">Ready</button>
+          <button id="resetButton" type="button">New game</button>
+        </div>
+      </header>
+
+      <section id="joinPanel" class="join">
+        <input id="nameInput" type="text" maxlength="24" placeholder="Your name">
+        <button id="joinButton" type="button">Join game</button>
+      </section>
+
+      <section class="boards" aria-label="Game boards">
+        <article>
+          <div class="board-title">
+            <h2>Your fleet</h2>
+            <span id="playerBadge">Not joined</span>
+          </div>
+          <div id="ownBoard" class="board" aria-label="Your board"></div>
+        </article>
+        <article>
+          <div class="board-title">
+            <h2>Enemy waters</h2>
+            <span id="turnBadge">Waiting</span>
+          </div>
+          <div id="enemyBoard" class="board target-board" aria-label="Enemy board"></div>
+        </article>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

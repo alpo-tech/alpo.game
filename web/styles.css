@@ -1,0 +1,214 @@
+:root {
+  color-scheme: dark;
+  --bg: #10151b;
+  --panel: #17202a;
+  --panel-2: #1f2b37;
+  --line: #344253;
+  --text: #f4f7fb;
+  --muted: #aab6c4;
+  --water: #163b50;
+  --water-hover: #1f5a74;
+  --ship: #8793a2;
+  --hit: #e35d4f;
+  --miss: #d7edf5;
+  --sunk: #f0b44f;
+  --accent: #58c4a8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+input {
+  width: min(280px, 100%);
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 0 12px;
+}
+
+.app {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(28px, 5vw, 52px);
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+#status {
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.actions,
+.join {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.join {
+  margin-bottom: 22px;
+}
+
+.boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(300px, 1fr));
+  gap: 22px;
+}
+
+article {
+  min-width: 0;
+}
+
+.board-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--muted);
+}
+
+.board-title span {
+  font-size: 14px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  width: min(100%, 520px);
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  background: var(--line);
+  gap: 1px;
+}
+
+.cell {
+  position: relative;
+  appearance: none;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: var(--water);
+}
+
+.cell:hover:not(:disabled) {
+  background: var(--water-hover);
+}
+
+.cell.ship {
+  background: var(--ship);
+}
+
+.cell.placed {
+  background: var(--accent);
+}
+
+.cell.hit,
+.cell.sunk {
+  background: var(--hit);
+}
+
+.cell.miss {
+  background: var(--water);
+}
+
+.cell.miss::after,
+.cell.hit::after,
+.cell.sunk::after {
+  content: "";
+  position: absolute;
+  inset: 32%;
+  border-radius: 999px;
+  background: var(--miss);
+}
+
+.cell.hit::before,
+.cell.sunk::before {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+}
+
+.cell.sunk {
+  background: var(--sunk);
+}
+
+.target-board .cell {
+  cursor: crosshair;
+}
+
+@media (max-width: 780px) {
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .boards {
+    grid-template-columns: 1fr;
+  }
+
+  .board {
+    width: 100%;
+  }
+}
