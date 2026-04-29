@@ -40,6 +40,10 @@ type shotRequest struct {
 	Col      int    `json:"col"`
 }
 
+type resetRequest struct {
+	PlayerID string `json:"playerId"`
+}
+
 type loggingResponseWriter struct {
 	http.ResponseWriter
 	status int
@@ -156,7 +160,22 @@ func (a *appState) shootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *appState) resetHandler(w http.ResponseWriter, r *http.Request) {
+	var req resetRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	if req.PlayerID == "" {
+		writeError(w, http.StatusBadRequest, "playerId is required")
+		return
+	}
+
 	a.mu.Lock()
+	if _, err := a.game.View(req.PlayerID); err != nil {
+		a.mu.Unlock()
+		writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
 	a.game = model.NewGame()
 	a.mu.Unlock()
 	writeJSON(w, http.StatusOK, map[string]string{"status": "reset"})
@@ -215,6 +234,17 @@ func randomID() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
+func newHTTPServer(addr string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+}
+
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(log.InfoLevel)
@@ -231,7 +261,7 @@ func main() {
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("web")))
 
 	log.Info("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := newHTTPServer(":8080", router).ListenAndServe(); err != nil {
 		log.WithError(err).Fatal("server stopped")
 	}
 }

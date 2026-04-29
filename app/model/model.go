@@ -96,6 +96,9 @@ func (g *Game) PlaceFleet(playerID string, placements []ShipPlacement) error {
 	if g.Winner != nil {
 		return errors.New("game is already finished")
 	}
+	if g.Players[playerIndex].Ready {
+		return errors.New("fleet is already placed")
+	}
 	if len(placements) != len(Fleet) {
 		return fmt.Errorf("expected %d ships", len(Fleet))
 	}

@@ -87,6 +87,20 @@ func TestViewHidesOpponentShips(t *testing.T) {
 	}
 }
 
+func TestPlaceFleetRejectsReadyPlayer(t *testing.T) {
+	game := NewGame()
+	if _, err := game.Join("p1", "one"); err != nil {
+		t.Fatal(err)
+	}
+	if err := game.PlaceFleet("p1", testFleetTop()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := game.PlaceFleet("p1", testFleetBottom()); err == nil {
+		t.Fatalf("expected replacing a ready fleet to be rejected")
+	}
+}
+
 func testFleetTop() []ShipPlacement {
 	return []ShipPlacement{
 		{Cells: []Coord{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}}},
@@ -94,5 +108,15 @@ func testFleetTop() []ShipPlacement {
 		{Cells: []Coord{{4, 0}, {4, 1}, {4, 2}}},
 		{Cells: []Coord{{6, 0}, {6, 1}, {6, 2}}},
 		{Cells: []Coord{{8, 0}, {8, 1}}},
+	}
+}
+
+func testFleetBottom() []ShipPlacement {
+	return []ShipPlacement{
+		{Cells: []Coord{{9, 5}, {9, 6}, {9, 7}, {9, 8}, {9, 9}}},
+		{Cells: []Coord{{7, 6}, {7, 7}, {7, 8}, {7, 9}}},
+		{Cells: []Coord{{5, 7}, {5, 8}, {5, 9}}},
+		{Cells: []Coord{{3, 7}, {3, 8}, {3, 9}}},
+		{Cells: []Coord{{1, 8}, {1, 9}}},
 	}
 }

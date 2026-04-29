@@ -83,9 +83,11 @@ The browser uses a small JSON API:
 - `GET /api/state?playerId=...` returns the current player view.
 - `POST /api/place` submits a fleet.
 - `POST /api/shoot` fires at a cell.
-- `POST /api/reset` resets the in-memory game.
+- `POST /api/reset` resets the in-memory game for a known `playerId`.
 
 The server keeps all state in memory. Restarting the process clears the game.
+The browser stores the player session in `sessionStorage`, so separate tabs or
+windows can join as separate players.
 
 ## Development
 
