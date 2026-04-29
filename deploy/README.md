@@ -37,3 +37,7 @@ GitHub Actions stores releases like this:
       alpo-game
       web/
 ```
+
+During deployment, temporary upload artifacts are staged under
+`~/.deploy/alpo-game-<commit-sha>` for the SSH user, then removed after the
+release is activated.

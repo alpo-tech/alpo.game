@@ -68,7 +68,7 @@ jobs:
       - name: Upload release artifacts
         run: |
           remote="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-          release="/tmp/${APP_NAME}-${GITHUB_SHA}"
+          release=".deploy/${APP_NAME}-${GITHUB_SHA}"
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$remote" "rm -rf '$release' && mkdir -p '$release'"
           scp -i ~/.ssh/deploy_key -P "$SSH_PORT" \
             dist/alpo-game dist/web.tar.gz deploy/alpo-game.service \
@@ -77,7 +77,7 @@ jobs:
       - name: Activate release
         run: |
           remote="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-          release="/tmp/${APP_NAME}-${GITHUB_SHA}"
+          release=".deploy/${APP_NAME}-${GITHUB_SHA}"
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$remote" "APP_DIR='$APP_DIR' RELEASE='$release' SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
           set -euo pipefail
 
