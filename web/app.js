@@ -3,7 +3,7 @@ const fleet = [5, 4, 3, 3, 2];
 const storageKey = "alpo-player-id";
 
 const state = {
-  playerId: localStorage.getItem(storageKey) || "",
+  playerId: sessionStorage.getItem(storageKey) || "",
   playerNumber: 0,
   view: null,
   draftShips: [],
@@ -49,7 +49,7 @@ async function joinGame() {
     });
     state.playerId = data.playerId;
     state.playerNumber = data.playerNumber;
-    localStorage.setItem(storageKey, state.playerId);
+    sessionStorage.setItem(storageKey, state.playerId);
     state.draftShips = generateFleet();
     await pollState();
   } catch (error) {
@@ -63,7 +63,7 @@ async function pollState() {
     state.playerNumber = state.view.playerNumber;
     render();
   } catch (error) {
-    localStorage.removeItem(storageKey);
+    sessionStorage.removeItem(storageKey);
     state.playerId = "";
     state.playerNumber = 0;
     state.view = null;
@@ -105,13 +105,24 @@ async function shoot(row, col) {
 }
 
 async function resetGame() {
-  await api("/api/reset", { method: "POST" });
-  localStorage.removeItem(storageKey);
-  state.playerId = "";
-  state.playerNumber = 0;
-  state.view = null;
-  state.draftShips = [];
-  render();
+  if (!state.playerId) {
+    setStatus("Join the current game first");
+    return;
+  }
+  try {
+    await api("/api/reset", {
+      method: "POST",
+      body: JSON.stringify({ playerId: state.playerId }),
+    });
+    sessionStorage.removeItem(storageKey);
+    state.playerId = "";
+    state.playerNumber = 0;
+    state.view = null;
+    state.draftShips = [];
+    render();
+  } catch (error) {
+    setStatus(error.message);
+  }
 }
 
 async function api(url, options = {}) {
