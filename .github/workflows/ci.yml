@@ -40,4 +40,4 @@ jobs:
         run: go test ./...
 
       - name: Build server
-        run: go build ./server
+        run: go build -o /tmp/alpo-game ./server
