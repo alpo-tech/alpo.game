@@ -142,6 +142,7 @@ function render() {
   autoPlaceButton.disabled = !state.playerId || Boolean(state.view && state.view.youReady);
   readyButton.disabled = !state.playerId || Boolean(state.view && state.view.youReady);
   playerBadge.textContent = state.playerNumber ? `Player ${state.playerNumber}` : "Not joined";
+  updateTargetFeedback();
 
   if (!state.playerId) {
     setStatus("Join from two browser windows to start");
@@ -165,6 +166,16 @@ function render() {
     renderDraftBoard();
   }
   renderBoard(enemyBoardEl, state.view.enemyBoard, shoot);
+}
+
+function updateTargetFeedback() {
+  const canShoot =
+    state.view &&
+    state.view.phase === "playing" &&
+    state.view.turn === state.view.playerNumber;
+
+  enemyBoardEl.classList.toggle("can-shoot", Boolean(canShoot));
+  enemyBoardEl.classList.toggle("waiting-turn", Boolean(state.view && !canShoot));
 }
 
 function renderEmptyBoards() {
