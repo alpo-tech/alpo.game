@@ -28,6 +28,12 @@ func TestNewHTTPServerConfiguresTimeouts(t *testing.T) {
 	}
 }
 
+func TestDefaultServerAddrUsesPort8081(t *testing.T) {
+	if defaultServerAddr != ":8081" {
+		t.Fatalf("expected default server addr :8081, got %q", defaultServerAddr)
+	}
+}
+
 func TestResetRequiresKnownPlayer(t *testing.T) {
 	state := newAppState()
 	router := testRouter(state)

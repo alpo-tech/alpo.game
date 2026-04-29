@@ -20,6 +20,8 @@ type appState struct {
 	game *model.Game
 }
 
+const defaultServerAddr = ":8081"
+
 type joinRequest struct {
 	Name string `json:"name"`
 }
@@ -260,8 +262,8 @@ func main() {
 	router.HandleFunc("/api/reset", state.resetHandler).Methods("POST")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("web")))
 
-	log.Info("Starting server on :8080")
-	if err := newHTTPServer(":8080", router).ListenAndServe(); err != nil {
+	log.Infof("Starting server on %s", defaultServerAddr)
+	if err := newHTTPServer(defaultServerAddr, router).ListenAndServe(); err != nil {
 		log.WithError(err).Fatal("server stopped")
 	}
 }

@@ -28,7 +28,7 @@ go run ./server
 Open two browser windows at:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 Join the game in each window, press `Auto place`, then `Ready`. When both
@@ -52,12 +52,12 @@ Look for an active `inet` address on `en0`, for example `192.168.1.67`.
 Players on the same Wi-Fi or LAN can then open:
 
 ```text
-http://192.168.1.67:8080
+http://192.168.1.67:8081
 ```
 
 If the page does not open from another computer, check that both devices are on
 the same network and that the operating system firewall allows incoming
-connections to port `8080`.
+connections to port `8081`.
 
 ## Gameplay
 
