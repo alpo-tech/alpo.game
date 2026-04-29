@@ -1,0 +1,103 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  APP_NAME: alpo-game
+  APP_DIR: /opt/alpo-game
+  SSH_PORT: ${{ secrets.VPS_PORT || '22' }}
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          cache: true
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l $(git ls-files '*.go'))"
+          if [ -n "$unformatted" ]; then
+            echo "The following files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build Linux binary
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+            -trimpath \
+            -ldflags="-s -w" \
+            -o dist/alpo-game ./server
+          tar -czf dist/web.tar.gz -C web .
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SSH_PORT" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload release artifacts
+        run: |
+          remote="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          release="/tmp/${APP_NAME}-${GITHUB_SHA}"
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$remote" "rm -rf '$release' && mkdir -p '$release'"
+          scp -i ~/.ssh/deploy_key -P "$SSH_PORT" \
+            dist/alpo-game dist/web.tar.gz deploy/alpo-game.service \
+            "$remote:$release/"
+
+      - name: Activate release
+        run: |
+          remote="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          release="/tmp/${APP_NAME}-${GITHUB_SHA}"
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$remote" "APP_DIR='$APP_DIR' RELEASE='$release' SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          sudo useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin alpo-game 2>/dev/null || true
+          sudo install -d -o alpo-game -g alpo-game "$APP_DIR/releases/$SHA"
+          sudo install -m 0755 "$RELEASE/alpo-game" "$APP_DIR/releases/$SHA/alpo-game"
+          sudo install -d -o alpo-game -g alpo-game "$APP_DIR/releases/$SHA/web"
+          sudo tar -xzf "$RELEASE/web.tar.gz" -C "$APP_DIR/releases/$SHA/web"
+          sudo chown -R alpo-game:alpo-game "$APP_DIR/releases/$SHA"
+          sudo ln -sfn "$APP_DIR/releases/$SHA" "$APP_DIR/current"
+          sudo install -m 0644 "$RELEASE/alpo-game.service" /etc/systemd/system/alpo-game.service
+          sudo systemctl daemon-reload
+          sudo systemctl enable alpo-game
+          sudo systemctl restart alpo-game
+          sudo systemctl --no-pager --full status alpo-game
+          rm -rf "$RELEASE"
+          REMOTE
+
+      - name: Smoke test
+        run: |
+          remote="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$remote" \
+            "curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8081/ >/dev/null"
